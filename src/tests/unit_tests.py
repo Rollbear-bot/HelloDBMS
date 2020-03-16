@@ -5,7 +5,7 @@
 
 import unittest
 
-from entity.exceptions import UnexpectedRow, UnexpectedCol
+from entity.exceptions import UnexpectedRow, UnexpectedCol, RowNoFound
 from entity.relation import Relation
 
 
@@ -18,7 +18,7 @@ def creat_a_tmp_relation():
     return relation
 
 
-class Test(unittest.TestCase):
+class TestRelation(unittest.TestCase):
 
     def test_add_row_and_col(self):
         """关于添加记录行的测试"""
@@ -45,6 +45,24 @@ class Test(unittest.TestCase):
             relation.add_row([4, 'Amy'])
             assert False
         except UnexpectedRow:
+            pass
+
+    def test_get_row(self):
+        """测试获取记录"""
+        row = creat_a_tmp_relation().get_row(index=1)
+        self.assertListEqual(row, [2, 'Sally', 59])
+
+    def test_get_invalid_row(self):
+        """尝试从空表中获取记录或获取不存在的记录行"""
+        try:
+            Relation().get_row(1)
+            assert False
+        except RowNoFound:
+            pass
+        try:
+            creat_a_tmp_relation().get_row(3)
+            assert False
+        except RowNoFound:
             pass
 
 
