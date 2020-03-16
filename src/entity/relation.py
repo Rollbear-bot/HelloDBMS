@@ -2,7 +2,8 @@
 # @Time: 2020/3/16 17:34
 # @Author: Rollbear
 # @Filename: relation.py
-from .exceptions import UnexpectedCol, UnexpectedRow
+
+from .exceptions import UnexpectedCol, UnexpectedRow, RowNoFound
 
 
 class Column:
@@ -32,4 +33,15 @@ class Relation(object):
         # 向关系中添加行
         for count in range(len(row)):
             self.cols[count].rows.append(row[count])
+
+    def get_row(self, index: int):
+        """获取一条记录"""
+        # 表空或者index指向不存在的记录时抛出异常
+        if len(self.cols) == 0 or index >= len(self.cols[0].rows):
+            raise RowNoFound
+        result = list(range(len(self.cols)))
+        for count in range(len(self.cols)):
+            result[count] = self.cols[count].rows[index]
+        return result
+
 

@@ -14,3 +14,9 @@ class UnexpectedRow(Exception):
     """不正确的记录行"""
     def __str__(self):
         return "不正确的记录行"
+
+
+class RowNoFound(Exception):
+    """找不到指定记录"""
+    def __str__(self):
+        return "找不到指定记录"
