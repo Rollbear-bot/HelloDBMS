@@ -4,7 +4,7 @@
 # @Filename: unit_tests.py
 
 import unittest
-
+'''
 from entity.exceptions import UnexpectedRow, UnexpectedCol, RowNoFound
 from entity.relation import Relation
 
@@ -68,3 +68,4 @@ class TestRelation(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+'''
