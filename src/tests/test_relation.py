@@ -5,15 +5,12 @@
 
 import unittest
 
-from entity.relation import Relation2, Row
+from entity.relation import *
 from entity.exceptions import *
 
 
 def create_tmp_relation():
-    result = Relation2()
-    result.add_col('id', [])
-    result.add_col('name', [])
-    result.add_col('score', [])
+    result = Relation(['id', 'name', 'score'])
     result.add_row([1, 'John', 99])
     result.add_row([2, 'Sally', 98])
     result.add_row([3, 'Tom', 80])
@@ -71,6 +68,29 @@ class TestRelation(unittest.TestCase):
             assert False
         except UnexpectedCol:
             pass
+
+    def test_add_invalid_row(self):
+        """关于添加记录行的测试"""
+        r = create_tmp_relation()
+        try:
+            r.add_row([1, 'Amy'])  # 缺少字段
+            assert False
+        except UnexpectedRow:
+            pass
+        try:
+            r.add_row([1, 1, 1, 1])  # 多余字段
+            assert False
+        except UnexpectedRow:
+            pass
+
+    def test_init_add_valid_row(self):
+        """正确添加了一行记录的情况"""
+        r = create_tmp_relation()
+        record = [4, 'Amy', 78]
+        r.add_row(record)
+        self.assertListEqual(
+            record,
+            r.switch_rows(lambda x: x.fields[0] == 4).rows[0].fields)
 
 
 if __name__ == '__main__':
