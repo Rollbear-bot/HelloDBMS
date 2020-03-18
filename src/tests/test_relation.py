@@ -7,6 +7,7 @@ import unittest
 
 from entity.relation import *
 from entity.exceptions import *
+from entity.row import Row
 
 
 def create_tmp_relation():
@@ -134,6 +135,47 @@ class TestRelation(unittest.TestCase):
             assert False
         except UnexpectedRelation:
             pass
+
+    def test_cartesian_product(self):
+        """测试笛卡尔积（常规情况）"""
+        r1 = create_tmp_relation()
+        r2 = Relation(['id', 'class'])
+        r2.add_row(['01', 'A'])
+        r2.add_row(['02', 'B'])
+        result = r1.cartesian_product(r2)
+        self.assertEqual(len(result.rows), len(r1.rows) * len(r2.rows))
+
+    def test_intersection(self):
+        """测试交运算（常规情况）"""
+        r1 = create_tmp_relation()
+        r2 = Relation(r1.cols.copy())
+        r2.add_row([2, 'Sally', 98])
+        r2.add_row([4, 'Jack', 98])
+        result = r1.intersection(r2)
+        self.assertEqual(len(result.cols), 3)
+        self.assertEqual(len(result.rows), 1)
+        self.assertEqual(result.rows[0], Row([2, 'Sally', 98]))
+
+    def test_invalid_relation_intersection(self):
+        """非法关系的交运算"""
+        r1 = create_tmp_relation()
+        r2 = Relation(['id', 'name'])
+        r2.add_row([1, 'John'])
+        try:
+            tmp = r1.intersection(r2)
+            assert False
+        except UnexpectedRelation:
+            pass
+
+    def test_empty_result_intersection(self):
+        """无交集时"""
+        r1 = create_tmp_relation()
+        r2 = Relation(r1.cols.copy())
+        r2.add_row([5, 'John', 99])
+        result = r1.intersection(r2)
+        self.assertFalse(not result.is_empty())
+        self.assertEqual(len(result.rows), 0)
+        self.assertListEqual(result.cols, r1.cols)
 
 
 class TestRow(unittest.TestCase):
