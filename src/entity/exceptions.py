@@ -20,3 +20,9 @@ class RowNoFound(Exception):
     """找不到指定记录"""
     def __str__(self):
         return "找不到指定记录"
+
+
+class UnexpectedRelation(Exception):
+    """不正确的关系"""
+    def __str__(self):
+        return "不正确的关系"
