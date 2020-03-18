@@ -4,25 +4,7 @@
 # @Filename: relation.py
 
 from .exceptions import *
-
-
-class Row:
-    """记录行"""
-    def __init__(self, fields: list):
-        """构造方法"""
-        self.fields = fields
-
-    def __eq__(self, other):
-        """判等重载"""
-        if len(self.fields) != len(other.fields):
-            return False
-        for i in range(len(self.fields)):
-            if self.fields[i] != other.fields[i]:
-                return False
-        return True
-
-    def __str__(self):
-        return str(self.fields)
+from .row import Row
 
 
 class Relation(object):
@@ -52,7 +34,9 @@ class Relation(object):
             raise UnexpectedRow
         self.rows.append(Row(fields))
 
+    # ---------------------------------------------------
     # -----关系代数5个基本操作：并、差、笛卡尔积、选择、投影-----
+    # ---------------------------------------------------
 
     def switch_rows(self, key=lambda x: True):
         """根据条件选择记录行"""
@@ -62,9 +46,13 @@ class Relation(object):
                 result.add_row(row.fields)
         return result
 
-    def cartesian_product(self):
+    def cartesian_product(self, other):
         """笛卡尔积"""
-        pass
+        result = Relation(self.cols + other.cols)
+        for row in self.rows:
+            for other_row in other.rows:
+                result.add_row(row.fields + other_row.fields)
+        return result
 
     def projection(self, col_names: list):
         """投影"""
@@ -90,7 +78,7 @@ class Relation(object):
                 other.cols != self.cols:
             raise UnexpectedRelation
 
-        result = self.__copy__()
+        result = self.copy()
         for row in other.rows:
             if row not in self.rows:
                 result.add_row(row.fields)
@@ -104,10 +92,25 @@ class Relation(object):
                 other.cols != self.cols:
             raise UnexpectedRelation
 
-        result = self.__copy__()
+        result = self.copy()
         for row in other.rows:
             if row in result.rows:
                 result.rows.remove(row)
+        return result
+
+    # ---------------------------------------------------
+    # -----                 进阶运算                 -----
+    # ---------------------------------------------------
+
+    def intersection(self, other):
+        """交运算"""
+        if (not isinstance(other, Relation)) or \
+                other.cols != self.cols:
+            raise UnexpectedRelation
+        result = Relation(self.cols.copy())
+        for row in self.rows:
+            if row in other.rows:
+                result.add_row(row.fields)
         return result
 
     # -----其他功能方法-----
@@ -120,9 +123,7 @@ class Relation(object):
         """判空"""
         return len(self.rows) == 0
 
-    def __copy__(self):
+    def copy(self):
         result = Relation(self.cols)
         result.rows = self.rows.copy()
         return result
-
-
