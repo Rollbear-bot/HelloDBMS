@@ -3,7 +3,7 @@
 # @Author: Rollbear
 # @Filename: relation.py
 
-from .exceptions import UnexpectedCol, UnexpectedRow, RowNoFound
+from .exceptions import *
 
 
 class Row:
@@ -11,6 +11,18 @@ class Row:
     def __init__(self, fields: list):
         """构造方法"""
         self.fields = fields
+
+    def __eq__(self, other):
+        """判等重载"""
+        if len(self.fields) != len(other.fields):
+            return False
+        for i in range(len(self.fields)):
+            if self.fields[i] != other.fields[i]:
+                return False
+        return True
+
+    def __str__(self):
+        return str(self.fields)
 
 
 class Relation(object):
@@ -40,14 +52,19 @@ class Relation(object):
             raise UnexpectedRow
         self.rows.append(Row(fields))
 
+    # -----关系代数5个基本操作：并、差、笛卡尔积、选择、投影-----
+
     def switch_rows(self, key=lambda x: True):
         """根据条件选择记录行"""
-        result = Relation()
-        result.cols = self.cols.copy()
+        result = Relation(self.cols.copy())
         for row in self.rows:
             if key(row):
                 result.add_row(row.fields)
         return result
+
+    def cartesian_product(self):
+        """笛卡尔积"""
+        pass
 
     def projection(self, col_names: list):
         """投影"""
@@ -56,7 +73,7 @@ class Relation(object):
             if item not in self.cols:
                 raise UnexpectedCol
 
-        result = Relation()
+        result = Relation(col_names.copy())
         result.cols = col_names
         for row in self.rows:
             fields = []
@@ -66,6 +83,35 @@ class Relation(object):
             result.add_row(fields)
         return result
 
+    def union(self, other):
+        """并运算"""
+        # 并运算要满足一些前提，否则抛出异常
+        if (not isinstance(other, Relation)) or \
+                other.cols != self.cols:
+            raise UnexpectedRelation
+
+        result = self.__copy__()
+        for row in other.rows:
+            if row not in self.rows:
+                result.add_row(row.fields)
+        return result
+
+    def __sub__(self, other):
+        """集合差运算
+        重载了减法运算符"""
+        # 差运算要满足一些前提，否则抛出异常（与并运算相同）
+        if (not isinstance(other, Relation)) or \
+                other.cols != self.cols:
+            raise UnexpectedRelation
+
+        result = self.__copy__()
+        for row in other.rows:
+            if row in result.rows:
+                result.rows.remove(row)
+        return result
+
+    # -----其他功能方法-----
+
     def set_field_names(self, field_names: list):
         """一次性设置多个属性名"""
         pass
@@ -73,3 +119,10 @@ class Relation(object):
     def is_empty(self):
         """判空"""
         return len(self.rows) == 0
+
+    def __copy__(self):
+        result = Relation(self.cols)
+        result.rows = self.rows.copy()
+        return result
+
+
