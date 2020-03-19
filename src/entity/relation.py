@@ -77,6 +77,7 @@ class Relation(object):
     def __mul__(self, other):
         """笛卡尔积
         重载了乘法运算"""
+        # todo::笛卡尔积目前不能很好地处理同名属性
         result = Relation(self.cols + other.cols)
         for row in self.rows:
             for other_row in other.rows:
@@ -161,13 +162,37 @@ class Relation(object):
                         + other_unshared_fields_projection.rows[other_index].fields)
         return result
 
+    def __truediv__(self, other):
+        """
+        除运算
+        重载了除法运算符，self是前操作数，other为后操作数
+        :param other: 除法的第二个操作数
+        :return: 一个关系对象
+        """
+        shared_fields = []
+        for field in self.cols:
+            if field in other.cols:
+                shared_fields.append(field)
+        # 如果两个关系没有共有属性，那么它们不能相除
+        if len(shared_fields) == 0:
+            raise UnexpectedRelation
+
+        # 找出前操作数中不属于共有属性的属性
+        self_unshared_fields = []
+        for field in self.cols:
+            if field not in shared_fields:
+                self_unshared_fields.append(field)
+        # 将他们投影出来
+        self_unshared_cols = self.projection(self_unshared_fields)
+        # 投影出后操作数中与前者共有的列
+        # other_shared_cols = other.projection(shared_fields)
+
+        total = self_unshared_cols * other
+        return self_unshared_cols - (total - self).projection(self_unshared_fields)
+
     # ---------------------------------------------------
     # -----              其他功能方法                 -----
     # ---------------------------------------------------
-
-    def set_field_names(self, field_names: list):
-        """一次性设置多个属性名"""
-        pass
 
     def is_empty(self):
         """判空"""
