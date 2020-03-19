@@ -72,7 +72,7 @@ class Relation(object):
             result.add_row(fields)
         return result
 
-    def union(self, other):
+    def __add__(self, other):
         """并运算"""
         # 并运算要满足一些前提，否则抛出异常
         if (not isinstance(other, Relation)) or \
