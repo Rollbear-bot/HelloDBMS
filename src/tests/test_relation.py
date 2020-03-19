@@ -210,6 +210,39 @@ class TestRelation(unittest.TestCase):
         except UnexpectedRelation:
             pass
 
+    def test_div_case_1(self):
+        """测试除法运算（常规情况）"""
+        r1 = create_tmp_relation()
+        r1.add_row([3, 'Tom', 98])
+        r2 = Relation(['score'])
+        r2.add_row([98])
+        r2.add_row([80])
+        result = r1 / r2
+        self.assertListEqual(result.cols, ['id', 'name'])
+        self.assertEqual(len(result.rows), 1)
+        self.assertListEqual(result.rows[0].fields, [3, 'Tom'])
+
+    def test_div_case_2(self):
+        """除法运算测试用例2"""
+        r1 = Relation(['name', 'course', 'score'])
+        r1.add_row(['ZJ', 'Physic', 93])
+        r1.add_row(['WH', 'Math', 86])
+        r1.add_row(['ZJ', 'Math', 93])
+        r1.add_row(['ZJ', 'Physic', 92])
+        r2 = Relation(['course'])
+        r2.add_row(['Math'])
+        r2.add_row(['Physic'])
+        result = r1 / r2
+        self.assertListEqual(result.rows[0].fields, ['ZJ', 93])
+
+    def test_relation_standardizing(self):
+        """测试关系的重构方法"""
+        r = create_tmp_relation()
+        pattern = Relation(['id', 'score', 'name'])
+        r.standardizing(pattern)
+        self.assertListEqual(r.cols, ['id', 'score', 'name'])
+        self.assertEqual(r.rows[0].fields[2], 'John')
+
 
 class TestRow(unittest.TestCase):
     """记录行测试类"""
