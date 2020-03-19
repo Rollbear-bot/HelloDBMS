@@ -173,3 +173,17 @@ class Relation(object):
         """关系判等"""
         return self.cols == other.cols and self.rows == other.rows
 
+    def __str__(self):
+        """关系的字符化输出"""
+        # 输出属性栏
+        output = ""
+        for field in self.cols:
+            output += "{:^10}".format(field)
+        # 输出行
+        for row in self.rows:
+            row_str = ""
+            for field in row.fields:
+                row_str += "{:^10}".format(field)
+            output += ("\n" + row_str)
+        return output
+
