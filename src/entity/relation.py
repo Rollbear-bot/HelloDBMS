@@ -46,7 +46,7 @@ class Relation(object):
                 result.add_row(row.fields)
         return result
 
-    def projection(self, col_names: list):
+    def projection(self, col_names: list, repeated_elem=False):
         """投影"""
         # 检查是否包含不存在的属性
         for item in col_names:
@@ -63,14 +63,15 @@ class Relation(object):
             result.add_row(fields)
 
         # 去重
-        tmp = []
-        for row in result.rows:
-            if row in tmp:
-                # result.rows.remove(row)
-                pass
-            else:
-                tmp.append(row)
-        result.rows = tmp
+        if not repeated_elem:
+            tmp = []
+            for row in result.rows:
+                if row in tmp:
+                    # result.rows.remove(row)
+                    pass
+                else:
+                    tmp.append(row)
+            result.rows = tmp
         return result
 
     def __mul__(self, other):
@@ -138,10 +139,9 @@ class Relation(object):
         if len(shared_fields) == 0:
             raise UnexpectedRelation
 
-        # 从两个关系中投影出公共属性
-        self_mark, other_mark = [], []
-        self_shared_fields = self.projection(shared_fields)
-        other_shared_fields = other.projection(shared_fields)
+        # 从两个关系中投影出公共属性，保留重复行
+        self_shared_fields = self.projection(shared_fields, True)
+        other_shared_fields = other.projection(shared_fields, True)
 
         # 挑出那些非共有的属性，进行投影，因为自然连接的结果中不出现重复的属性
         other_unshared_fields = []
@@ -196,7 +196,3 @@ class Relation(object):
                 row_str += "{:^10}".format(field)
             output += ("\n" + row_str)
         return output
-
-    def field_index(self, field_name: str):
-        return self.cols.index(field_name)
-

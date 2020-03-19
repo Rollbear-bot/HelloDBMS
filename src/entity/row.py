@@ -22,7 +22,7 @@ class Row:
                 return False
         return True
 
-    def field_index(self, field_name: str):
+    def index(self, field_name: str):
         """定位一个属性的列"""
         return self.field_names.index(field_name)
 
