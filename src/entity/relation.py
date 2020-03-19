@@ -66,8 +66,11 @@ class Relation(object):
         tmp = []
         for row in result.rows:
             if row in tmp:
-                result.rows.remove(row)
-            tmp.append(row)
+                # result.rows.remove(row)
+                pass
+            else:
+                tmp.append(row)
+        result.rows = tmp
         return result
 
     def __mul__(self, other):
