@@ -32,7 +32,7 @@ class Relation(object):
         if len(self.rows) != 0 and \
                 len(fields) != len(self.rows[0].fields):
             raise UnexpectedRow
-        self.rows.append(Row(fields))
+        self.rows.append(Row(fields, self.cols))
 
     # ---------------------------------------------------
     # -----关系代数5个基本操作：并、差、笛卡尔积、选择、投影-----
@@ -196,4 +196,7 @@ class Relation(object):
                 row_str += "{:^10}".format(field)
             output += ("\n" + row_str)
         return output
+
+    def field_index(self, field_name: str):
+        return self.cols.index(field_name)
 

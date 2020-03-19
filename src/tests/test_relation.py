@@ -108,7 +108,7 @@ class TestRelation(unittest.TestCase):
         r2.add_row([5, 'Jack', 60])
         result = r1 + r2
         self.assertEqual(len(result.rows), 4)
-        self.assertFalse(not result.rows[3] == Row([5, 'Jack', 60]))
+        self.assertFalse(not result.rows[3].fields[0] == 5)
 
     def test_invalid_relation_union(self):
         """对不合法的关系执行并运算"""
@@ -130,7 +130,7 @@ class TestRelation(unittest.TestCase):
         r2.add_row([5, 'Jack', 60])
         result = r1 - r2
         self.assertListEqual(result.cols, r1.cols)
-        self.assertEqual(result.rows[1], Row([3, 'Tom', 80]))
+        self.assertListEqual(result.rows[1].fields, [3, 'Tom', 80])
 
     def test_invalid_relation_sub(self):
         """非法关系下的差运算"""
@@ -161,7 +161,7 @@ class TestRelation(unittest.TestCase):
         result = r1.intersection(r2)
         self.assertEqual(len(result.cols), 3)
         self.assertEqual(len(result.rows), 1)
-        self.assertEqual(result.rows[0], Row([2, 'Sally', 98]))
+        self.assertListEqual(result.rows[0].fields, [2, 'Sally', 98])
 
     def test_invalid_relation_intersection(self):
         """非法关系的交运算"""
@@ -193,12 +193,12 @@ class TestRelation(unittest.TestCase):
         r2.add_row([5, 'B'])
         result = r1.natural_join(r2)
         self.assertEqual(len(result.rows), 2)
-        self.assertEqual(
-            result.switch_rows(lambda x: x.fields[3] == 'A').rows[0],
-            Row([1, 'John', 99, 'A']))
-        self.assertEqual(
-            result.switch_rows(lambda x: x.fields[0] == 2).rows[0],
-            Row([2, 'Sally', 98, 'B']))
+        self.assertListEqual(
+            result.switch_rows(lambda x: x.fields[3] == 'A').rows[0].fields,
+            [1, 'John', 99, 'A'])
+        self.assertListEqual(
+            result.switch_rows(lambda x: x.fields[0] == 2).rows[0].fields,
+            [2, 'Sally', 98, 'B'])
 
     def test_natural_join_unexpected_relation(self):
         """使用非法的关系进行自然连接"""
@@ -214,10 +214,11 @@ class TestRelation(unittest.TestCase):
 class TestRow(unittest.TestCase):
     """记录行测试类"""
     def test_eq(self):
-        r1 = Row([1, 2, 3])
-        r2 = Row([2, 1, 3])
+        col_names = ['a', 'b', 'c']
+        r1 = Row([1, 2, 3], col_names)
+        r2 = Row([2, 1, 3], col_names)
         self.assertFalse(r1 == r2)
-        r3 = Row([1, 2, 3])
+        r3 = Row([1, 2, 3], col_names)
         self.assertFalse(not r1 == r3)
 
 
