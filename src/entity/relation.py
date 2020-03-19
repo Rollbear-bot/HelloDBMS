@@ -113,7 +113,46 @@ class Relation(object):
                 result.add_row(row.fields)
         return result
 
-    # -----其他功能方法-----
+    def natural_join(self, other):
+        """自然连接
+        自然连接的步骤：
+        1.选出公共属性
+        2.找出公共属性列完全相同的行
+        3.从笛卡尔积中选出这些行"""
+        shared_fields = []
+        for field in self.cols:
+            if field in other.cols:
+                shared_fields.append(field)
+        # 如果两个关系没有共有属性，那么它们不能自然连接
+        if len(shared_fields) == 0:
+            raise UnexpectedRelation
+
+        # 从两个关系中投影出公共属性
+        self_mark, other_mark = [], []
+        self_shared_fields = self.projection(shared_fields)
+        other_shared_fields = other.projection(shared_fields)
+
+        # 挑出那些非共有的属性，进行投影，因为自然连接的结果中不出现重复的属性
+        other_unshared_fields = []
+        for field in other.cols:
+            if field not in shared_fields:
+                other_unshared_fields.append(field)
+        other_unshared_fields_projection \
+            = other.projection(other_unshared_fields)
+
+        result = Relation(self.cols + other_unshared_fields)
+        for self_index in range(len(self.rows)):
+            for other_index in range(len(other.rows)):
+                if self_shared_fields.rows[self_index] \
+                        == other_shared_fields.rows[other_index]:
+                    result.add_row(
+                        self.rows[self_index].fields
+                        + other_unshared_fields_projection.rows[other_index].fields)
+        return result
+
+    # ---------------------------------------------------
+    # -----              其他功能方法                 -----
+    # ---------------------------------------------------
 
     def set_field_names(self, field_names: list):
         """一次性设置多个属性名"""
@@ -124,6 +163,12 @@ class Relation(object):
         return len(self.rows) == 0
 
     def copy(self):
+        """关系对象的深复制"""
         result = Relation(self.cols)
         result.rows = self.rows.copy()
         return result
+
+    def __eq__(self, other):
+        """关系判等"""
+        return self.cols == other.cols and self.rows == other.rows
+
