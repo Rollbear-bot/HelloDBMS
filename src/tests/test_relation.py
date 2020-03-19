@@ -11,6 +11,7 @@ from entity.row import Row
 
 
 def create_tmp_relation():
+    """生成一个测试用关系对象"""
     result = Relation(['id', 'name', 'score'])
     result.add_row([1, 'John', 99])
     result.add_row([2, 'Sally', 98])
@@ -19,7 +20,7 @@ def create_tmp_relation():
 
 
 class TestRelation(unittest.TestCase):
-    """测试类"""
+    """关系对象测试类"""
 
     def test_switch_one_row(self):
         """对行选取方法的测试"""
@@ -39,12 +40,24 @@ class TestRelation(unittest.TestCase):
         self.assertListEqual(result.rows[1].fields, [2, 'Sally', 98])
 
     def test_switch_None(self):
-        """测试所有行不满足条件时"""
+        """所有行不满足条件时"""
         r = create_tmp_relation()
         result = r.switch_rows(lambda x: x.fields[2] > 100)
         self.assertEqual(len(result.rows), 0)
         self.assertFalse(not result.is_empty())
 
+    def test_relation_standardizing(self):
+        """测试关系的重构方法"""
+        r = create_tmp_relation()
+        pattern = Relation(['id', 'score', 'name'])
+        r.standardizing(pattern)
+        self.assertListEqual(r.cols, ['id', 'score', 'name'])
+        self.assertEqual(r.rows[0].fields[2], 'John')
+
+
+class TestProjection(unittest.TestCase):
+    """投影运算测试类
+    """
     def test_projection(self):
         """测试关系的投影"""
         r = create_tmp_relation()
@@ -77,6 +90,10 @@ class TestRelation(unittest.TestCase):
         except UnexpectedCol:
             pass
 
+
+class TestAddRow(unittest.TestCase):
+    """行追加测试类"""
+
     def test_add_invalid_row(self):
         """关于添加记录行的测试"""
         r = create_tmp_relation()
@@ -100,6 +117,10 @@ class TestRelation(unittest.TestCase):
             record,
             r.switch_rows(lambda x: x.fields[0] == 4).rows[0].fields)
 
+
+class TestUnion(unittest.TestCase):
+    """并运算测试类"""
+
     def test_union(self):
         """并运算测试（常规情况）"""
         r1 = create_tmp_relation()
@@ -122,6 +143,10 @@ class TestRelation(unittest.TestCase):
         except UnexpectedRelation:
             pass
 
+
+class TestSub(unittest.TestCase):
+    """差运算测试类"""
+
     def test_sub(self):
         """测试差运算（常规情况）"""
         r1 = create_tmp_relation()
@@ -143,6 +168,10 @@ class TestRelation(unittest.TestCase):
         except UnexpectedRelation:
             pass
 
+
+class TestCartesianProduct(unittest.TestCase):
+    """笛卡儿积运算测试"""
+
     def test_cartesian_product(self):
         """测试笛卡尔积（常规情况）"""
         r1 = create_tmp_relation()
@@ -151,6 +180,10 @@ class TestRelation(unittest.TestCase):
         r2.add_row(['02', 'B'])
         result = r1 * r2
         self.assertEqual(len(result.rows), len(r1.rows) * len(r2.rows))
+
+
+class TestIntersection(unittest.TestCase):
+    """交运算测试类"""
 
     def test_intersection(self):
         """测试交运算（常规情况）"""
@@ -184,6 +217,10 @@ class TestRelation(unittest.TestCase):
         self.assertEqual(len(result.rows), 0)
         self.assertListEqual(result.cols, r1.cols)
 
+
+class TestNaturalJoin(unittest.TestCase):
+    """自然连接运算测试类"""
+
     def test_natural_join(self):
         """自然连接（常规情况）"""
         r1 = create_tmp_relation()
@@ -210,6 +247,10 @@ class TestRelation(unittest.TestCase):
         except UnexpectedRelation:
             pass
 
+
+class TestDiv(unittest.TestCase):
+    """除法运算测试类"""
+
     def test_div_case_1(self):
         """测试除法运算（常规情况）"""
         r1 = create_tmp_relation()
@@ -234,14 +275,6 @@ class TestRelation(unittest.TestCase):
         r2.add_row(['Physic'])
         result = r1 / r2
         self.assertListEqual(result.rows[0].fields, ['ZJ', 93])
-
-    def test_relation_standardizing(self):
-        """测试关系的重构方法"""
-        r = create_tmp_relation()
-        pattern = Relation(['id', 'score', 'name'])
-        r.standardizing(pattern)
-        self.assertListEqual(r.cols, ['id', 'score', 'name'])
-        self.assertEqual(r.rows[0].fields[2], 'John')
 
 
 class TestRow(unittest.TestCase):
