@@ -61,6 +61,13 @@ class TestRelation(unittest.TestCase):
         self.assertListEqual(result.cols, ['name', 'id'])
         self.assertListEqual(result.rows[0].fields, ['John', 1])
 
+    def test_projection_same_rows(self):
+        """投影中有相同行时"""
+        r = create_tmp_relation()
+        r.add_row([4, 'Jack', 99])
+        result = r.projection(['score'])
+        self.assertEqual(len(result.rows), 3)
+
     def test_invalid_col_projection(self):
         """测试投影出空集的情况"""
         r = create_tmp_relation()
@@ -99,7 +106,7 @@ class TestRelation(unittest.TestCase):
         r2 = Relation(r1.cols.copy())
         r2.add_row([2, 'Sally', 98])
         r2.add_row([5, 'Jack', 60])
-        result = r1.union(r2)
+        result = r1 + r2
         self.assertEqual(len(result.rows), 4)
         self.assertFalse(not result.rows[3] == Row([5, 'Jack', 60]))
 
@@ -110,7 +117,7 @@ class TestRelation(unittest.TestCase):
         r2.add_row([5, 'Jack'])
         try:
             # 此处应当抛出异常
-            r1.union(r2)
+            r1 + r2
             assert False
         except UnexpectedRelation:
             pass

@@ -46,15 +46,6 @@ class Relation(object):
                 result.add_row(row.fields)
         return result
 
-    def __mul__(self, other):
-        """笛卡尔积
-        重载了乘法运算"""
-        result = Relation(self.cols + other.cols)
-        for row in self.rows:
-            for other_row in other.rows:
-                result.add_row(row.fields + other_row.fields)
-        return result
-
     def projection(self, col_names: list):
         """投影"""
         # 检查是否包含不存在的属性
@@ -70,6 +61,22 @@ class Relation(object):
                 if field in self.cols:
                     fields.append(row.fields[self.cols.index(field)])
             result.add_row(fields)
+
+        # 去重
+        tmp = []
+        for row in result.rows:
+            if row in tmp:
+                result.rows.remove(row)
+            tmp.append(row)
+        return result
+
+    def __mul__(self, other):
+        """笛卡尔积
+        重载了乘法运算"""
+        result = Relation(self.cols + other.cols)
+        for row in self.rows:
+            for other_row in other.rows:
+                result.add_row(row.fields + other_row.fields)
         return result
 
     def __add__(self, other):
