@@ -142,7 +142,7 @@ class TestRelation(unittest.TestCase):
         r2 = Relation(['id', 'class'])
         r2.add_row(['01', 'A'])
         r2.add_row(['02', 'B'])
-        result = r1.cartesian_product(r2)
+        result = r1 * r2
         self.assertEqual(len(result.rows), len(r1.rows) * len(r2.rows))
 
     def test_intersection(self):

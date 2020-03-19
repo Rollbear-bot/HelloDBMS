@@ -46,8 +46,9 @@ class Relation(object):
                 result.add_row(row.fields)
         return result
 
-    def cartesian_product(self, other):
-        """笛卡尔积"""
+    def __mul__(self, other):
+        """笛卡尔积
+        重载了乘法运算"""
         result = Relation(self.cols + other.cols)
         for row in self.rows:
             for other_row in other.rows:
@@ -99,7 +100,7 @@ class Relation(object):
         return result
 
     # ---------------------------------------------------
-    # -----                 进阶运算                 -----
+    # -----            关系代数的附加运算              -----
     # ---------------------------------------------------
 
     def intersection(self, other):
