@@ -87,9 +87,11 @@ class Relation(object):
     def __add__(self, other):
         """并运算"""
         # 并运算要满足一些前提，否则抛出异常
-        if (not isinstance(other, Relation)) or \
-                other.cols != self.cols:
+        if not isinstance(other, Relation):
             raise UnexpectedRelation
+
+        # 以左操作数为模板对右操作数进行重构
+        other.standardizing(pattern=self)
 
         result = self.copy()
         for row in other.rows:
@@ -101,9 +103,11 @@ class Relation(object):
         """集合差运算
         重载了减法运算符"""
         # 差运算要满足一些前提，否则抛出异常（与并运算相同）
-        if (not isinstance(other, Relation)) or \
-                other.cols != self.cols:
+        if not isinstance(other, Relation):
             raise UnexpectedRelation
+
+        # 以左操作数为模板对右操作数进行重构
+        other.standardizing(pattern=self)
 
         result = self.copy()
         for row in other.rows:
@@ -204,12 +208,35 @@ class Relation(object):
         result.rows = self.rows.copy()
         return result
 
+    def standardizing(self, pattern):
+        """根据模板标准化/重构一个关系"""
+        # 前提是两个关系拥有相同的字段集，函数通过列的交换，
+        # 使得两个关系的字段按相同的顺序排列，以便进行关系代数运算
+        if (not isinstance(pattern, Relation)) \
+                or (set(self.cols) != set(pattern.cols)):
+            raise UnexpectedRelation
+
+        pattern_fields = pattern.cols.copy()
+        field_locate = []
+        for field in self.cols:
+            # 找到当前关系对象的每个字段在模板中的位置
+            field_locate.append(pattern_fields.index(field))
+        # 将当前关系的字段表和所有行调整为模板中的顺序
+        self.cols = pattern_fields
+        for row in self.rows:
+            row.field_names = pattern_fields
+            tmp = row.fields.copy()
+            for index in range(len(tmp)):
+                tmp[field_locate[index]] = row.fields[index]
+            row.fields = tmp
+        return self
+
     def __eq__(self, other):
-        """关系判等"""
+        """关系对象的判等"""
         return self.cols == other.cols and self.rows == other.rows
 
     def __str__(self):
-        """关系的字符化输出"""
+        """关系对象的的字符化输出"""
         # 输出属性栏
         output = ""
         for field in self.cols:
