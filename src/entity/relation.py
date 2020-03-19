@@ -38,7 +38,7 @@ class Relation(object):
     # -----关系代数5个基本操作：并、差、笛卡尔积、选择、投影-----
     # ---------------------------------------------------
 
-    def switch_rows(self, key=lambda x: True):
+    def selection(self, key=lambda x: True):
         """根据条件选择记录行"""
         result = Relation(self.cols.copy())
         for row in self.rows:
@@ -116,7 +116,7 @@ class Relation(object):
         return result
 
     # ---------------------------------------------------
-    # -----            关系代数的附加运算              -----
+    # -----            关系代数的特殊运算              -----
     # ---------------------------------------------------
 
     def intersection(self, other):

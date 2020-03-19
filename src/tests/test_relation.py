@@ -25,7 +25,7 @@ class TestRelation(unittest.TestCase):
     def test_switch_one_row(self):
         """对行选取方法的测试"""
         r = create_tmp_relation()
-        result = r.switch_rows(lambda x: x.fields[1] == 'Tom')
+        result = r.selection(lambda x: x.fields[1] == 'Tom')
         self.assertEqual(len(result.rows), 1)
         self.assertListEqual(result.cols, ['id', 'name', 'score'])
         self.assertListEqual(result.rows[0].fields, [3, 'Tom', 80])
@@ -33,7 +33,7 @@ class TestRelation(unittest.TestCase):
     def test_switch_two_rows(self):
         """测试从关系中选取两行"""
         r = create_tmp_relation()
-        result = r.switch_rows(lambda x: x.fields[2] > 90)
+        result = r.selection(lambda x: x.fields[2] > 90)
         self.assertEqual(len(result.rows), 2)
         self.assertListEqual(result.cols, ['id', 'name', 'score'])
         self.assertListEqual(result.rows[0].fields, [1, 'John', 99])
@@ -42,7 +42,7 @@ class TestRelation(unittest.TestCase):
     def test_switch_None(self):
         """所有行不满足条件时"""
         r = create_tmp_relation()
-        result = r.switch_rows(lambda x: x.fields[2] > 100)
+        result = r.selection(lambda x: x.fields[2] > 100)
         self.assertEqual(len(result.rows), 0)
         self.assertFalse(not result.is_empty())
 
@@ -115,7 +115,7 @@ class TestAddRow(unittest.TestCase):
         r.add_row(record)
         self.assertListEqual(
             record,
-            r.switch_rows(lambda x: x.fields[0] == 4).rows[0].fields)
+            r.selection(lambda x: x.fields[0] == 4).rows[0].fields)
 
 
 class TestUnion(unittest.TestCase):
@@ -144,10 +144,10 @@ class TestUnion(unittest.TestCase):
             pass
 
 
-class TestSub(unittest.TestCase):
+class TestDifference(unittest.TestCase):
     """差运算测试类"""
 
-    def test_sub(self):
+    def test_difference(self):
         """测试差运算（常规情况）"""
         r1 = create_tmp_relation()
         r2 = Relation(r1.cols.copy())
@@ -157,7 +157,7 @@ class TestSub(unittest.TestCase):
         self.assertListEqual(result.cols, r1.cols)
         self.assertListEqual(result.rows[1].fields, [3, 'Tom', 80])
 
-    def test_invalid_relation_sub(self):
+    def test_invalid_relation_difference(self):
         """非法关系下的差运算"""
         r1 = create_tmp_relation()
         r2 = Relation(['id', 'name'])
@@ -231,10 +231,10 @@ class TestNaturalJoin(unittest.TestCase):
         result = r1.natural_join(r2)
         self.assertEqual(len(result.rows), 2)
         self.assertListEqual(
-            result.switch_rows(lambda x: x.fields[3] == 'A').rows[0].fields,
+            result.selection(lambda x: x.fields[3] == 'A').rows[0].fields,
             [1, 'John', 99, 'A'])
         self.assertListEqual(
-            result.switch_rows(lambda x: x.fields[0] == 2).rows[0].fields,
+            result.selection(lambda x: x.fields[0] == 2).rows[0].fields,
             [2, 'Sally', 98, 'B'])
 
     def test_natural_join_unexpected_relation(self):
