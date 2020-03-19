@@ -177,6 +177,32 @@ class TestRelation(unittest.TestCase):
         self.assertEqual(len(result.rows), 0)
         self.assertListEqual(result.cols, r1.cols)
 
+    def test_natural_join(self):
+        """自然连接（常规情况）"""
+        r1 = create_tmp_relation()
+        r2 = Relation(['id', 'class'])
+        r2.add_row([1, 'A'])
+        r2.add_row([2, 'B'])
+        r2.add_row([5, 'B'])
+        result = r1.natural_join(r2)
+        self.assertEqual(len(result.rows), 2)
+        self.assertEqual(
+            result.switch_rows(lambda x: x.fields[3] == 'A').rows[0],
+            Row([1, 'John', 99, 'A']))
+        self.assertEqual(
+            result.switch_rows(lambda x: x.fields[0] == 2).rows[0],
+            Row([2, 'Sally', 98, 'B']))
+
+    def test_natural_join_unexpected_relation(self):
+        """使用非法的关系进行自然连接"""
+        r1 = create_tmp_relation()
+        r2 = Relation(['s_id', 's_name'])
+        try:
+            tmp = r1.natural_join(r2)
+            assert False
+        except UnexpectedRelation:
+            pass
+
 
 class TestRow(unittest.TestCase):
     """记录行测试类"""
