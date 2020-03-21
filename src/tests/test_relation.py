@@ -10,6 +10,8 @@ from entity.exceptions import *
 from entity.row import Row
 
 
+# 不要修改这个文件的内容
+
 def create_tmp_relation():
     """生成一个测试用关系对象"""
     result = Relation(['id', 'name', 'score'])
@@ -232,6 +234,18 @@ class TestIntersection(unittest.TestCase):
         self.assertEqual(len(result.cols), 3)
         self.assertEqual(len(result.rows), 1)
         self.assertListEqual(result.rows[0].fields, [2, 'Sally', 98])
+
+    def test_intersection_case_2(self):
+        """交运算测试用例2"""
+        association, join, student, dormitory = create_tmp_relations()
+        r1 = student.natural_join(dormitory) \
+            .selection(lambda x: x.fields[x.index('院系')] == '经管学院' and x.fields[x.index('班级')] == '3班') \
+            .projection(['宿舍楼', '房间号'])
+        r2 = student.natural_join(dormitory) \
+            .selection(lambda x: x.fields[x.index('院系')] == '经管学院' and x.fields[x.index('班级')] == '5班') \
+            .projection(['宿舍楼', '房间号'])
+        result = r1.intersection(r2)
+        self.assertListEqual(result.rows[0].fields, ['东十三', '222'])
 
     def test_invalid_relation_intersection(self):
         """非法关系的交运算"""
