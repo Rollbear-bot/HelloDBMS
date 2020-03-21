@@ -4,7 +4,7 @@
 
 + Why the repo?
   + For skill learning:books:, experimenting:wrench: after class.
-  + More for fun:happy:!
+  + More for fun!:happy:
 
 
 
@@ -16,7 +16,7 @@
 
    + By calling the `selection(lambda)` method.
 
-   + Define a `lambda` to choose the rows you want, and use `Row.index()` to locate a field, just like the below.
+   + Define a `lambda` to choose the rows you want, and use `Row.index()` to locate a field, just like the follow.
 
      ```python
      relation = r.selection(
@@ -27,9 +27,9 @@
 
 2. **Projection**, 投影运算
 
-   + By providing a field list to `projection` method.
+   + Use the `projection` method.
 
-   + Choose the columns you need.
+   + Choose some of the columns you need in the relation object.
 
      ```python
      relation = r.projection(['id', 'name'])
@@ -167,6 +167,12 @@
         John       98    
         Tom        80    
      ```
+
+
+
+### Quick Start
+
++ You can also open the file `src/playground.py` in your IDE to get a **Quick Start**.
 
 
 
