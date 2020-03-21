@@ -19,6 +19,43 @@ def create_tmp_relation():
     return result
 
 
+def create_tmp_relations():
+    """
+    生成一组测试用关系对象
+    :return: 四元组（社团关系，参加关系，学生关系，宿舍关系）
+    """
+    association, join, student, dormitory = Relation(["社团编号", "社团名", "学号"]), \
+        Relation(["学号", "社团编号"]),\
+        Relation(["学号", "姓名", "性别", "院系", "班级", "宿舍编号"]),\
+        Relation(["宿舍编号", "房间号", "宿舍楼"])
+    # 添加学生
+    student.add_row([1, "张三", "男", "计算机学院", "3班", 1])
+    student.add_row([2, "李四", "男", "计算机学院", "3班", 1])
+    student.add_row([3, "王五", "男", "计算机学院", "4班", 2])
+    student.add_row([4, "Tom", "男", "计算机学院", "4班", 2])
+    student.add_row([5, "Jack", "男", "经管学院", "3班", 3])
+    student.add_row([6, "John", "男", "经管学院", "3班", 4])
+    student.add_row([7, "Sam", "男", "经管学院", "5班", 4])
+    student.add_row([8, "Tom", "男", "经管学院", "4班", 4])
+    # 添加社团
+    association.add_row([1, "篮球社", 1])
+    association.add_row([2, "足球社", 1])
+    association.add_row([3, "动漫社", 6])
+    # 添加参加关系
+    join.add_row([1, 1])  # 张三参加篮球社
+    join.add_row([1, 2])  # 张三参加足球社
+    join.add_row([2, 1])  # 李四参加篮球社
+    join.add_row([3, 1])  # 王五参加篮球社
+    join.add_row([3, 2])  # 王五参加足球社
+    join.add_row([6, 3])  # Jack参加动漫社
+    # 添加宿舍
+    dormitory.add_row([1, "322", "东十二"])
+    dormitory.add_row([2, "323", "东十二"])
+    dormitory.add_row([3, "222", "东十三"])
+    dormitory.add_row([4, "222", "东十三"])
+    return association, join, student, dormitory
+
+
 class TestRelation(unittest.TestCase):
     """关系对象测试类"""
 
@@ -277,31 +314,8 @@ class TestDiv(unittest.TestCase):
         self.assertListEqual(result.rows[0].fields, ['ZJ', 93])
 
     def test_div_case_3(self):
-        """除法运算测试用例3"""
-        association = Relation(["社团编号", "社团名", "学号"])
-        join = Relation(["学号", "社团编号"])
-        student = Relation(["学号", "姓名", "性别", "院系", "班级", "宿舍编号"])
-        dormitory = Relation(["宿舍编号", "房间号", "宿舍楼"])
-
-        student.add_row([1, "张三", "男", "计算机学院", "3班", 1])
-        student.add_row([2, "李四", "男", "计算机学院", "3班", 1])
-        student.add_row([3, "王五", "男", "计算机学院", "4班", 2])
-        student.add_row([4, "Tom", "男", "计算机学院", "4班", 2])
-
-        student.add_row([5, "Jack", "男", "经管学院", "3班", 3])
-        student.add_row([6, "John", "男", "经管学院", "3班", 4])
-        student.add_row([7, "Sam", "男", "经管学院", "5班", 4])
-        student.add_row([8, "Tom", "男", "经管学院", "4班", 4])
-
-        association.add_row([1, "篮球社", 1])
-        association.add_row([2, "足球社", 1])
-
-        join.add_row([1, 1])  # 张三参加篮球社
-        join.add_row([1, 2])  # 张三参加足球社
-        join.add_row([2, 1])  # 李四参加篮球社
-        join.add_row([3, 1])  # 王五参加篮球社
-        join.add_row([3, 2])  # 王五参加足球社
-
+        """除法/混合运算测试用例3"""
+        association, join, student, dormitory = create_tmp_relations()
         # 找出所有参加了“王五”参加的所有社团的学生姓名
         r1 = student.natural_join(join).projection(['姓名', '社团编号'])
         r2 = student.natural_join(join).selection(
@@ -309,6 +323,20 @@ class TestDiv(unittest.TestCase):
         result = r1 / r2
         for row in result.rows:
             self.assertTrue(row.fields in [['张三'], ['王五']])
+
+    def test_div_case_4(self):
+        """除法/混合运算测试用例4"""
+        association, join, student, dormitory = create_tmp_relations()
+        r1 = student.projection(['姓名', '院系', '班级', '宿舍编号'])
+        r2 = student.natural_join(association)\
+            .selection(lambda x: x.fields[x.index('社团名')] == '动漫社')\
+            .projection(['宿舍编号'])
+        # 找出动漫社负责人的舍友的姓名、院系、班级
+        result = (r1 / r2) - student.natural_join(association)\
+            .selection(lambda x: x.fields[x.index('社团名')] == '动漫社')\
+            .projection(['姓名', '院系', '班级'])
+        for row in result.rows:
+            self.assertTrue(row.fields[0] in ['Tom', 'Sam'])
 
 
 class TestRow(unittest.TestCase):
