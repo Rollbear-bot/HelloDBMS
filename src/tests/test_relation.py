@@ -44,7 +44,7 @@ class TestRelation(unittest.TestCase):
         r = create_tmp_relation()
         result = r.selection(lambda x: x.fields[2] > 100)
         self.assertEqual(len(result.rows), 0)
-        self.assertFalse(not result.is_empty())
+        self.assertTrue(result.is_empty())
 
     def test_relation_standardizing(self):
         """测试关系的重构方法"""
@@ -129,7 +129,7 @@ class TestUnion(unittest.TestCase):
         r2.add_row([5, 'Jack', 60])
         result = r1 + r2
         self.assertEqual(len(result.rows), 4)
-        self.assertFalse(not result.rows[3].fields[0] == 5)
+        self.assertTrue(result.rows[3].fields[0] == 5)
 
     def test_invalid_relation_union(self):
         """对不合法的关系执行并运算"""
@@ -213,7 +213,7 @@ class TestIntersection(unittest.TestCase):
         r2 = Relation(r1.cols.copy())
         r2.add_row([5, 'John', 99])
         result = r1.intersection(r2)
-        self.assertFalse(not result.is_empty())
+        self.assertTrue(result.is_empty())
         self.assertEqual(len(result.rows), 0)
         self.assertListEqual(result.cols, r1.cols)
 
@@ -276,6 +276,40 @@ class TestDiv(unittest.TestCase):
         result = r1 / r2
         self.assertListEqual(result.rows[0].fields, ['ZJ', 93])
 
+    def test_div_case_3(self):
+        """除法运算测试用例3"""
+        association = Relation(["社团编号", "社团名", "学号"])
+        join = Relation(["学号", "社团编号"])
+        student = Relation(["学号", "姓名", "性别", "院系", "班级", "宿舍编号"])
+        dormitory = Relation(["宿舍编号", "房间号", "宿舍楼"])
+
+        student.add_row([1, "张三", "男", "计算机学院", "3班", 1])
+        student.add_row([2, "李四", "男", "计算机学院", "3班", 1])
+        student.add_row([3, "王五", "男", "计算机学院", "4班", 2])
+        student.add_row([4, "Tom", "男", "计算机学院", "4班", 2])
+
+        student.add_row([5, "Jack", "男", "经管学院", "3班", 3])
+        student.add_row([6, "John", "男", "经管学院", "3班", 4])
+        student.add_row([7, "Sam", "男", "经管学院", "5班", 4])
+        student.add_row([8, "Tom", "男", "经管学院", "4班", 4])
+
+        association.add_row([1, "篮球社", 1])
+        association.add_row([2, "足球社", 1])
+
+        join.add_row([1, 1])  # 张三参加篮球社
+        join.add_row([1, 2])  # 张三参加足球社
+        join.add_row([2, 1])  # 李四参加篮球社
+        join.add_row([3, 1])  # 王五参加篮球社
+        join.add_row([3, 2])  # 王五参加足球社
+
+        # 找出所有参加了“王五”参加的所有社团的学生姓名
+        r1 = student.natural_join(join).projection(['姓名', '社团编号'])
+        r2 = student.natural_join(join).selection(
+            lambda x: x.fields[x.index('姓名')] == '王五').projection(['社团编号'])
+        result = r1 / r2
+        for row in result.rows:
+            self.assertTrue(row.fields in [['张三'], ['王五']])
+
 
 class TestRow(unittest.TestCase):
     """记录行测试类"""
@@ -285,7 +319,7 @@ class TestRow(unittest.TestCase):
         r2 = Row([2, 1, 3], col_names)
         self.assertFalse(r1 == r2)
         r3 = Row([1, 2, 3], col_names)
-        self.assertFalse(not r1 == r3)
+        self.assertTrue(r1 == r3)
 
 
 if __name__ == '__main__':

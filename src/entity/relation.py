@@ -66,10 +66,7 @@ class Relation(object):
         if not repeated_elem:
             tmp = []
             for row in result.rows:
-                if row in tmp:
-                    # result.rows.remove(row)
-                    pass
-                else:
+                if row not in tmp:
                     tmp.append(row)
             result.rows = tmp
         return result
@@ -148,15 +145,17 @@ class Relation(object):
         self_shared_fields = self.projection(shared_fields, True)
         other_shared_fields = other.projection(shared_fields, True)
 
-        # 挑出那些非共有的属性，进行投影，因为自然连接的结果中不出现重复的属性
+        # 挑出那些非共有的属性，进行投影，自然连接的结果中不出现重复的属性
         other_unshared_fields = []
         for field in other.cols:
             if field not in shared_fields:
                 other_unshared_fields.append(field)
         other_unshared_fields_projection \
-            = other.projection(other_unshared_fields)
+            = other.projection(other_unshared_fields, True)
 
         result = Relation(self.cols + other_unshared_fields)
+
+        # 行匹配，然后拼接成为最后的经过
         for self_index in range(len(self.rows)):
             for other_index in range(len(other.rows)):
                 if self_shared_fields.rows[self_index] \
@@ -237,7 +236,10 @@ class Relation(object):
 
     def __str__(self):
         """关系对象的的字符化输出"""
-        # 输出属性栏
+        return str(self.cols)
+
+    def show(self):
+        """以表格的方式打印当前关系对象"""
         output = ""
         for field in self.cols:
             output += "{:^10}".format(field)
@@ -247,4 +249,4 @@ class Relation(object):
             for field in row.fields:
                 row_str += "{:^10}".format(field)
             output += ("\n" + row_str)
-        return output
+        print(output)

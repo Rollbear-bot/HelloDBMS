@@ -132,7 +132,7 @@
 5. Try your expressions!
 
    ```python
-   >>> print(relation)  # Print the relation object your just created.
+   >>> relation.show()  # Print the relation object your just created.
        id       name     score   
        1        John       98    
        2        Tom        80    
@@ -142,18 +142,18 @@
 
      ```python
      >>> # Select the rows whose 'id' == 2.
-     >>> print(relation.selection(
+     >>> relation.selection(
      >>>		lambda x: x.fields[x.index('id')] == 2
-     >>> ))
+     >>> ).show()
          id       name     score   
          2        Tom        80    
      ```
 
      ```python
-     >>> print(relation.selection(
+     >>> relation.selection(
      >>> 	lambda x: x.fields[x.index('id')] == 2 
      >>> 	or x.fields[x.index('score')] == 98
-     >>> ))
+     >>> ).show()
          id       name     score   
          1        John       98    
          2        Tom        80    
@@ -162,7 +162,7 @@
    + Push your fields in, and get projection return.
 
      ```python
-     >>> print(relation.projection(['name', 'score']))
+     >>> relation.projection(['name', 'score']).show()
         name     score   
         John       98    
         Tom        80    
