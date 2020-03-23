@@ -250,3 +250,11 @@ class Relation(object):
                 row_str += "{:^10}".format(field)
             output += ("\n" + row_str)
         print(output)
+
+    def rename(self, field_name, new_name):
+        """字段更名"""
+        index = self.cols.index(field_name)
+        self.cols[index] = new_name
+        for row in self.rows:
+            row.field_names[index] = new_name
+        return self
