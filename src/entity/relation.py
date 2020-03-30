@@ -35,7 +35,7 @@ class Relation(object):
         self.rows.append(Row(fields, self.cols))
 
     # ---------------------------------------------------
-    # -----关系代数5个基本操作：并、差、笛卡尔积、选择、投影-----
+    # --关系代数6个基本操作：并、差、笛卡尔积、选择、投影、更名---
     # ---------------------------------------------------
 
     def selection(self, key=lambda x: True):
@@ -111,6 +111,19 @@ class Relation(object):
             if row in result.rows:
                 result.rows.remove(row)
         return result
+
+    def rename(self, field_name, new_name):
+        """
+        字段更名
+        :param field_name: 旧字段名
+        :param new_name: 新字段名
+        :return:
+        """
+        index = self.cols.index(field_name)
+        self.cols[index] = new_name
+        for row in self.rows:
+            row.field_names[index] = new_name
+        return self
 
     # ---------------------------------------------------
     # -----            关系代数的特殊运算              -----
@@ -251,10 +264,4 @@ class Relation(object):
             output += ("\n" + row_str)
         print(output)
 
-    def rename(self, field_name, new_name):
-        """字段更名"""
-        index = self.cols.index(field_name)
-        self.cols[index] = new_name
-        for row in self.rows:
-            row.field_names[index] = new_name
-        return self
+
