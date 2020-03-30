@@ -3,6 +3,8 @@
 # @Author: Rollbear
 # @Filename: row.py
 
+from .exceptions import UnKnownField
+
 
 class Row:
     """记录行"""
@@ -24,6 +26,8 @@ class Row:
 
     def index(self, field_name: str):
         """定位一个属性的列"""
+        if field_name not in self.field_names:
+            raise UnKnownField  # 找不到该字段名，则抛出异常
         return self.field_names.index(field_name)
 
     def __str__(self):

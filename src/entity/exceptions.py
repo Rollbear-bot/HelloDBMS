@@ -26,3 +26,10 @@ class UnexpectedRelation(Exception):
     """不正确的关系"""
     def __str__(self):
         return "不正确的关系"
+
+
+class UnKnownField(Exception):
+    """未知的字段名"""
+    def __str__(self):
+        return "未知的字段名"
+
